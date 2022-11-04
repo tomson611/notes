@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -53,7 +55,7 @@ class _RegisterViewState extends State<RegisterView> {
                 final userCredential = await FirebaseAuth.instance
                     .createUserWithEmailAndPassword(
                         email: email, password: password);
-                print(userCredential);
+                log(userCredential.toString());
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -79,12 +81,12 @@ class _RegisterViewState extends State<RegisterView> {
             child: const Text('Register'),
           ),
           TextButton(
-          onPressed: () {
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil('/login/', (route) => false);
-          },
-          child: const Text('Already registered? Login here!'),
-        )
+            onPressed: () {
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/login/', (route) => false);
+            },
+            child: const Text('Already registered? Login here!'),
+          )
         ],
       ),
     );

@@ -91,7 +91,7 @@ class _NotesViewState extends State<NotesView> {
               return [
                 const PopupMenuItem<MenuAction>(
                   value: MenuAction.logout,
-                  child: Text('Log out'),
+                  child: Text('Logout'),
                 ),
               ];
             },
@@ -108,8 +108,8 @@ Future<bool> showLogOutDialog(BuildContext context) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text('Sign out'),
-        content: const Text('Do you want to sign out?'),
+        title: const Text('Logout'),
+        content: const Text('Do you want to log out?'),
         actions: [
           TextButton(
             onPressed: () {

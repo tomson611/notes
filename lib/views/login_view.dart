@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes/constants/routes.dart';
+import 'package:notes/utilities/custom_snackbar.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -62,18 +63,26 @@ class _LoginViewState extends State<LoginView> {
                 );
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('User not found'),
-                    ),
+                  customSnackbar(
+                    context,
+                    'User not found',
                   );
                 } else if (e.code == 'wrong-password') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Wrong password'),
-                    ),
+                  customSnackbar(
+                    context,
+                    'Wrong password',
+                  );
+                } else {
+                  customSnackbar(
+                    context,
+                    e.code,
                   );
                 }
+              } catch (e) {
+                customSnackbar(
+                  context,
+                  e.toString(),
+                );
               }
             },
             child: const Text('Log in'),

@@ -1,8 +1,8 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes/constants/routes.dart';
+import 'package:notes/utilities/custom_snackbar.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -53,30 +53,41 @@ class _RegisterViewState extends State<RegisterView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                final userCredential = await FirebaseAuth.instance
-                    .createUserWithEmailAndPassword(
-                        email: email, password: password);
-                log(userCredential.toString());
+                await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                );
+                if (!mounted) return;
+                final user = FirebaseAuth.instance.currentUser;
+                user?.sendEmailVerification(); 
+                Navigator.of(context).pushNamed(verifyEmailRoute);
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Weak password'),
-                    ),
+                  customSnackbar(
+                    context,
+                    'Weak password',
                   );
                 } else if (e.code == 'email-already-in-use') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Email already in use'),
-                    ),
+                  customSnackbar(
+                    context,
+                    'Email already in use',
                   );
                 } else if (e.code == 'invalid-email') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Invalid email entered'),
-                    ),
+                  customSnackbar(
+                    context,
+                    'Invalid email',
+                  );
+                } else {
+                  customSnackbar(
+                    context,
+                    e.code,
                   );
                 }
+              } catch (e) {
+                customSnackbar(
+                  context,
+                  e.toString(),
+                );
               }
             },
             child: const Text('Register'),

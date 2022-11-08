@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes/constants/routes.dart';
@@ -59,7 +58,7 @@ class _RegisterViewState extends State<RegisterView> {
                 );
                 if (!mounted) return;
                 final user = FirebaseAuth.instance.currentUser;
-                user?.sendEmailVerification(); 
+                user?.sendEmailVerification();
                 Navigator.of(context).pushNamed(verifyEmailRoute);
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {

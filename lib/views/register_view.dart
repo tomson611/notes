@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes/constants/routes.dart';
+import 'package:notes/services/auth/auth_exceptions.dart';
+import 'package:notes/services/auth/auth_service.dart';
 import 'package:notes/utilities/custom_snackbar.dart';
 
 class RegisterView extends StatefulWidget {
@@ -52,40 +53,32 @@ class _RegisterViewState extends State<RegisterView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                await AuthService.firebase().createUser(
                   email: email,
                   password: password,
                 );
                 if (!mounted) return;
-                final user = FirebaseAuth.instance.currentUser;
-                user?.sendEmailVerification();
+                AuthService.firebase().sendEmailVerification();
                 Navigator.of(context).pushNamed(verifyEmailRoute);
-              } on FirebaseAuthException catch (e) {
-                if (e.code == 'weak-password') {
-                  customSnackbar(
-                    context,
-                    'Weak password',
-                  );
-                } else if (e.code == 'email-already-in-use') {
-                  customSnackbar(
-                    context,
-                    'Email already in use',
-                  );
-                } else if (e.code == 'invalid-email') {
-                  customSnackbar(
-                    context,
-                    'Invalid email',
-                  );
-                } else {
-                  customSnackbar(
-                    context,
-                    e.code,
-                  );
-                }
-              } catch (e) {
+              } on WeakPasswordAuthException {
                 customSnackbar(
                   context,
-                  e.toString(),
+                  'Weak password',
+                );
+              } on EmailAlreadyInUseAuthException {
+                customSnackbar(
+                  context,
+                  'Email already in use',
+                );
+              } on InvalidEmailAuthException {
+                customSnackbar(
+                  context,
+                  'Invalid email',
+                );
+              } on GenericAuthException {
+                customSnackbar(
+                  context,
+                  'Failed to register',
                 );
               }
             },

@@ -32,11 +32,17 @@ class NotesService {
   List<DatabaseNote> _notes = [];
 
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance() {
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      },
+    );
+  }
+
   factory NotesService() => _shared;
 
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
 
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
@@ -48,6 +54,12 @@ class NotesService {
       final createdUser = await createUser(email: email);
       return createdUser;
     } catch (e) {
+      // if (e == CouldNotFindUser) {
+      //   final createdUser = await createUser(email: email);
+      //   return createdUser;
+      // } else {
+      //   rethrow;
+      // }
       rethrow;
     }
   }
@@ -141,9 +153,14 @@ class NotesService {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
-    final updatesCount = await db.update(noteTable, {
-      textColumn: text,
-    });
+    final updatesCount = await db.update(
+      noteTable,
+      {
+        textColumn: text,
+      },
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
 
     if (updatesCount == 0) {
       throw CouldNotUpdateNote;
@@ -199,7 +216,7 @@ class NotesService {
       whereArgs: [email.toLowerCase()],
     );
     if (results.isEmpty) {
-      throw CouldNotFindUser;
+      throw CouldNotFindUser();
     } else {
       return DatabaseUser.fromRow(results.first);
     }
